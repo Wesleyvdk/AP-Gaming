@@ -1,0 +1,16 @@
+{
+  "name": "teamserene",
+  "version": "0.0.1",
+  "main": "bot.js",
+  "scripts": {
+    "start": "yarn run deploy && yarn run bot",
+    "bot": "node bot.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "author": "ehzgodd",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  }
+}
