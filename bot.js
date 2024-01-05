@@ -88,7 +88,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-client.on(Events.MessageCreate, async () => {
+client.on(Events.MessageCreate, async (message) => {
   // NOTIFICATIE CHANNELS
 
   // bsl-announcements
