@@ -98,7 +98,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // Apex News
   if (message.channel.id === "1189105088296402984") {
@@ -107,7 +107,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // CSGO news
   if (message.channel.id === "1189104957266329700") {
@@ -116,7 +116,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // FIFA news
   if (message.channel.id === "1189104806992826388") {
@@ -125,7 +125,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // Fortnite news
   if (message.channel.id === "1189104997154181140") {
@@ -134,7 +134,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // LOL news
   if (message.channel.id === "1189104745743388693") {
@@ -143,7 +143,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // Overwatch news
   if (message.channel.id === "1189104912613781524") {
@@ -152,7 +152,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // R6S news
   if (message.channel.id === "1189105140028944384") {
@@ -161,7 +161,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // RL news
   if (message.channel.id === "1189104613647990804") {
@@ -170,7 +170,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
   // Valorant news
   if (message.channel.id === "1189104689816551454") {
@@ -179,7 +179,7 @@ client.on(Events.MessageCreate, async (message) => {
       (role) => role.name === roleName
     );
     const roleMention = role.toString();
-    channel.send(roleMention);
+    message.channel.send(roleMention);
   }
 });
 client.login(process.env.DISCORD_TOKEN);
