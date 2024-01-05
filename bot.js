@@ -89,10 +89,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  // NOTIFICATIE CHANNELS
-
-  // bsl-announcements
+  if (message.author.id === "1187457826747076608") return;
   if (message.channel.id === "1188979321457614878") {
+    // NOTIFICATIE CHANNELS
+
+    // bsl-announcements
     const roleName = "BSL notif.";
     const role = message.guild.roles.cache.find(
       (role) => role.name === roleName
