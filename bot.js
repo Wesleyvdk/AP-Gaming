@@ -182,8 +182,18 @@ client.on(Events.MessageCreate, async (message) => {
     const roleMention = role.toString();
     message.channel.send(roleMention);
   }
+  // Gaming news
   if (message.channel.id === "1193197272096313405") {
     const roleName = "Gaming news";
+    const role = message.guild.roles.cache.find(
+      (role) => role.name === roleName
+    );
+    const roleMention = role.toString();
+    message.channel.send(roleMention);
+  }
+  // upcoming matches notif,
+  if (message.channel.id === "1188687188620218459") {
+    const roleName = "Upcoming matches notif.";
     const role = message.guild.roles.cache.find(
       (role) => role.name === roleName
     );
