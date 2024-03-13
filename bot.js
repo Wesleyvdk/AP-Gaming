@@ -12,6 +12,9 @@ const {
   roleMention,
 } = require("discord.js");
 require("dotenv").config();
+const Database = require("better-sqlite3");
+
+const APdb = new Database("./database/AP.sqlite");
 
 const client = new Client({
   intents: [
@@ -57,6 +60,27 @@ for (const folder of commandFolders) {
 }
 
 client.once(Events.ClientReady, async () => {
+  const APTable = APdb.prepare(
+    "SELECT count() FROM sqlite_master WHERE type='table' AND name = 'designs';"
+  ).get();
+  if (!APTable["count()"]) {
+    // If the table isn't there, create it and setup the database correctly.
+
+    APdb.prepare(
+      "CREATE TABLE designs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, extranotes TEXT, deadline TEXT, priority INTEGER);"
+    ).run();
+    APdb.prepare("CREATE UNIQUE INDEX idx_design_id ON designs (id);").run();
+    APdb.exec("PRAGMA journal_mode = WAL;");
+  }
+  client.getDesignsByName = APdb.prepare(
+    "SELECT * FROM designs WHERE name = ?"
+  );
+  client.getDesignsById = APdb.prepare("SELECT * FROM designs WHERE id = ?");
+  client.getDesigns = APdb.prepare("SELECT * FROM designs");
+  client.setDesigns = APdb.prepare(
+    "INSERT OR REPLACE INTO designs (name, description, extranotes, deadline, priority) VALUES (@name, @description, @extranotes, @deadline, @priority);"
+  );
+  console.log(`designs table loaded successfully`);
   console.log(`logged in as: ${client.user.username}. ready to be used!`);
 });
 
