@@ -13,6 +13,7 @@ const {
 } = require("discord.js");
 require("dotenv").config();
 const Database = require("better-sqlite3");
+const moment = require("moment/moment");
 
 const APdb = new Database("./database/AP.sqlite");
 
@@ -67,7 +68,7 @@ client.once(Events.ClientReady, async () => {
     // If the table isn't there, create it and setup the database correctly.
 
     APdb.prepare(
-      "CREATE TABLE designs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, extranotes TEXT, deadline TEXT, priority INTEGER);"
+      "CREATE TABLE designs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, extranotes TEXT, deadline TEXT, priority INTEGER, completed INTEGER, completedDate TEXT);"
     ).run();
     APdb.prepare("CREATE UNIQUE INDEX idx_design_id ON designs (id);").run();
     APdb.exec("PRAGMA journal_mode = WAL;");
@@ -78,7 +79,13 @@ client.once(Events.ClientReady, async () => {
   client.getDesignsById = APdb.prepare("SELECT * FROM designs WHERE id = ?");
   client.getDesigns = APdb.prepare("SELECT * FROM designs");
   client.setDesigns = APdb.prepare(
-    "INSERT OR REPLACE INTO designs (name, description, extranotes, deadline, priority) VALUES (@name, @description, @extranotes, @deadline, @priority);"
+    "INSERT OR REPLACE INTO designs (name, description, extranotes, deadline, priority, completed, completedDate) VALUES (@name, @description, @extranotes, @deadline, @priority, @completed, @completedDate);"
+  );
+  client.setDesignsById = APdb.prepare(
+    "UPDATE designs SET completed = @completed, completedDate = @completedDate WHERE id = @id;"
+  );
+  client.setDesignsByName = APdb.prepare(
+    "UPDATE designs SET completed = @completed, completedDate = @completedDate  WHERE name = @name;"
   );
   console.log(`designs table loaded successfully`);
   console.log(`logged in as: ${client.user.username}. ready to be used!`);
@@ -95,7 +102,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   try {
-    await command.execute(interaction);
+    await command.execute(client, interaction);
   } catch (error) {
     console.error(error);
     if (interaction.replied || interaction.deferred) {

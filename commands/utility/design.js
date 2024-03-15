@@ -8,8 +8,11 @@ const {
   TextInputBuilder,
   TextInputStyle,
   ComponentType,
+  PermissionFlagsBits,
 } = require("discord.js");
 const Database = require("better-sqlite3");
+const APdb = new Database("H:/projects/APBot/database/AP.sqlite");
+const moment = require("moment/moment");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,7 +27,7 @@ module.exports = {
     .addSubcommand((option) =>
       option
         .setName("show")
-        .setDescription("show a  detailed version for design project")
+        .setDescription("show a detailed version for design project")
         .addStringOption((option) =>
           option.setName("project_id").setDescription("select a project by id")
         )
@@ -33,8 +36,27 @@ module.exports = {
             .setName("project_name")
             .setDescription("select a project by name")
         )
-    ),
-  async execute(interaction) {
+    )
+    .addSubcommand((option) =>
+      option
+        .setName("completed")
+        .setDescription("set a design as completed")
+        .addStringOption((option) =>
+          option.setName("project_id").setDescription("select a project by id")
+        )
+        .addStringOption((option) =>
+          option
+            .setName("project_name")
+            .setDescription("select a project by name")
+        )
+    )
+    .addSubcommand((option) =>
+      option
+        .setName("archived")
+        .setDescription("Shows a list of archived projects")
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+  async execute(client, interaction) {
     if (interaction.options.getSubcommand() === "add") {
       const modal = new ModalBuilder()
         .setCustomId("projectdesign")
@@ -50,12 +72,13 @@ module.exports = {
         .setLabel("Description")
         // Short means only a single line of text
         .setStyle(TextInputStyle.Paragraph);
+      const projectNameRow = new ActionRowBuilder().addComponents(projectName);
       const descriptionRow = new ActionRowBuilder().addComponents(description);
-      const extraNotes = new TextInputBuilder()
-        .setCustomId("extranotes")
-        .setLabel("Extra Notes")
-        .setStyle(TextInputStyle.Short);
-      const extraNotesRow = new ActionRowBuilder().addComponents(extraNotes);
+      // const extraNotes = new TextInputBuilder()
+      //   .setCustomId("extranotes")
+      //   .setLabel("Extra Notes")
+      //   .setStyle(TextInputStyle.Short);
+      // const extraNotesRow = new ActionRowBuilder().addComponents(extraNotes);
       const deadline = new TextInputBuilder()
         .setCustomId("deadline")
         .setLabel("Deadline")
@@ -68,23 +91,24 @@ module.exports = {
       const priorityRow = new ActionRowBuilder().addComponents(priority);
       // Add inputs to the modal
       modal.addComponents(
+        projectNameRow,
         descriptionRow,
         deadlineRow,
-        priorityRow,
-        extraNotesRow
+        priorityRow
+        //extraNotesRow
       );
 
       // Show the modal to the user
       await interaction.showModal(modal);
-      const filter = (interaction) => interaction.customId === `projectname`;
+      const filter = (interaction) => interaction.customId === `projectdesign`;
       interaction
         .awaitModalSubmit({ filter, time: 30_000 })
         .then((modalInteraction) => {
-          const nameReply = modalInteraction.getTextInputValue("name");
+          const nameReply = modalInteraction.fields.getTextInputValue("name");
           const descriptionReply =
             modalInteraction.fields.getTextInputValue("description");
-          const extraNotesReply =
-            modalInteraction.fields.getTextInputValue("extranotes");
+          // const extraNotesReply =
+          //   modalInteraction.fields.getTextInputValue("extranotes");
           const deadlineReply =
             modalInteraction.fields.getTextInputValue("deadline");
           const priorityReply =
@@ -94,50 +118,197 @@ module.exports = {
             rProjects = {
               name: `${nameReply}`,
               description: `${descriptionReply}`,
-              extranotes: `${extraNotesReply}`,
+              extranotes: ``,
               deadline: `${deadlineReply}`,
               priority: Number(priorityReply),
+              completed: 0,
+              completedDate: "",
             };
           }
+          client.setDesigns.run(rProjects);
+          const embed = new EmbedBuilder()
+            .setTitle(nameReply)
+            .setDescription(descriptionReply)
+            .addFields(
+              { name: "Deadline", value: `${deadlineReply}`, inline: true },
+              { name: "\u200B", value: "\u200B", inline: true },
+              { name: "Priority", value: `${priorityReply}`, inline: true }
+            );
+          modalInteraction.reply({ content: "Project added", embeds: [embed] });
         });
     }
     if (interaction.options.getSubcommand() === "list") {
-      let rProjects = client.getDesigns();
-      if (!rProjects) {
-        interaction.reply({
-          content: "There are no projects",
-          ephemeral: true,
-        });
+      const rows = await APdb.prepare(
+        "SELECT * FROM designs WHERE completed = 0"
+      ).all();
+
+      let maxIdLength = "Id".length;
+      let maxTitleLength = "Title".length;
+      let maxPriorityLength = "Priority".length;
+      let maxDeadlineLength = "Deadline".length;
+
+      for (const data of rows) {
+        maxIdLength = Math.max(maxIdLength, data.id.toString().length);
+        maxTitleLength = Math.max(maxTitleLength, data.name.length);
+        maxPriorityLength = Math.max(
+          maxPriorityLength,
+          data.priority.toString().length
+        );
+        maxDeadlineLength = Math.max(maxDeadlineLength, data.deadline.length);
       }
-      const embed = new EmbedBuilder().setTitle("Design Projects");
+      // Create a header row
+      let message = "```\n";
+      message += `${"Id".padEnd(maxIdLength)} | ${"Title".padEnd(
+        maxTitleLength
+      )} | ${"Priority".padEnd(maxPriorityLength)} | ${"Deadline".padEnd(
+        maxDeadlineLength
+      )} |\n`;
+      message += `${"-".repeat(maxIdLength)} | ${"-".repeat(
+        maxTitleLength
+      )} | ${"-".repeat(maxPriorityLength)} | ${"-".repeat(
+        maxDeadlineLength
+      )} |\n`;
+      for (const data of rows) {
+        message += `${data.id
+          .toString()
+          .padEnd(maxIdLength)} | ${data.name.padEnd(
+          maxTitleLength
+        )} | ${data.priority
+          .toString()
+          .padEnd(maxPriorityLength)} | ${data.deadline.padEnd(
+          maxDeadlineLength
+        )} |\n`;
+      }
+      message += "```";
+      interaction.reply(message);
     }
     if (interaction.options.getSubcommand() === "show") {
       projectId = interaction.options.getString("project_id");
       projectName = interaction.options.getString("project_name");
-      if (!projectId || !projectName) {
+      if (projectId) {
+        let rProjectsId = client.getDesignsById.get(projectId);
+        if (!rProjectsId) {
+          interaction.reply({
+            content: "There is no project with this name or id",
+            ephemeral: true,
+          });
+        }
+        const embed = new EmbedBuilder()
+          .setTitle(`${rProjectsId.name}`)
+          .setDescription(`**Description**\n${rProjectsId.description}\n`)
+          .addFields(
+            {
+              name: "Deadline",
+              value: `${rProjectsId.deadline}`,
+              inline: true,
+            },
+            { name: "\u200B", value: "\u200B", inline: true },
+            { name: "Priority", value: `${rProjectsId.priority}`, inline: true }
+          );
+        await interaction.reply({ embeds: [embed] });
+      }
+      if (projectName) {
+        let rProjectsName = client.getDesignsByName.get(projectName);
+        if (!rProjectsName) {
+          interaction.reply({
+            content: "There is no project with this name or id",
+            ephemeral: true,
+          });
+        }
+        const embed = new EmbedBuilder()
+          .setTitle(`${rProjectsName.name}`)
+          .setDescription(`**Description**\n${rProjectsName.description}`)
+          .addFields(
+            {
+              name: "Deadline",
+              value: `${rProjectsName.deadline}`,
+              inline: true,
+            },
+            { name: "\u200B", value: "\u200B", inline: true },
+            {
+              name: "Priority",
+              value: `${rProjectsName.priority}`,
+              inline: true,
+            }
+          );
+        await interaction.reply({ embeds: [embed] });
+      }
+      if (!projectId && !projectName) {
         interaction.reply({
           content: "Please specify a project name or a project id",
           ephemeral: true,
         });
       }
-      let rProjectsId = client.getDesignsById.get(projectId);
-      let rProjectsName = client.getDesignsByName.get(projectName);
-      if (!rProjectsId || !rProjectsName) {
+    }
+    if (interaction.options.getSubcommand() === "completed") {
+      projectId = interaction.options.getString("project_id");
+      projectName = interaction.options.getString("project_name");
+      if (projectId) {
+        let rProjectsId = client.getDesignsById.get(projectId);
+        if (!rProjectsId) {
+          interaction.reply({
+            content: "There is no project with this name or id",
+            ephemeral: true,
+          });
+        }
+        rProjectsId.completedDate = moment().format("DD/MM/YYYY");
+        rProjectsId.completed = 1;
+        client.setDesignsById.run(rProjectsId);
+        await interaction.reply({ content: "Project set as completed" });
+      }
+      if (projectName) {
+        let rProjectsName = client.getDesignsByName.get(projectName);
+        if (!rProjectsName) {
+          interaction.reply({
+            content: "There is no project with this name or id",
+            ephemeral: true,
+          });
+        }
+        rProjectsName.completedDate = moment().format("DD/MM/YYYY");
+        rProjectsName.completed = 1;
+        client.setDesignsByName.run(rProjectsName);
+        await interaction.reply({});
+      }
+      if (!projectId && !projectName) {
         interaction.reply({
-          content: "There is no project with this name or id",
+          content: "Please specify a project name or a project id",
           ephemeral: true,
         });
       }
+    }
+    if (interaction.options.getSubcommand() === "archived") {
+      const rows = await APdb.prepare(
+        "SELECT * FROM designs WHERE completed = 1"
+      ).all();
 
-      const embed = new EmbedBuilder()
-        .setTitle(project.title)
-        .setDescription(project.description)
-        .addFields(
-          { name: "Deadline", value: `${project.deadline}`, inline: true },
-          { name: "\u200B", value: "\u200B", inline: true },
-          { name: "Priority", value: `${project.priority}`, inline: true }
-        );
-      await interaction.reply({ embeds: [embed] });
+      let maxIdLength = "Id".length;
+      let maxTitleLength = "Title".length;
+
+      let maxDoCLength = "Date of Completion".length;
+
+      for (const data of rows) {
+        maxIdLength = Math.max(maxIdLength, data.id.toString().length);
+        maxTitleLength = Math.max(maxTitleLength, data.name.length);
+
+        maxDoCLength = Math.max(maxDoCLength, data.completedDate.length);
+      }
+      // Create a header row
+      let message = "```\n";
+      message += `${"Id".padEnd(maxIdLength)} | ${"Title".padEnd(
+        maxTitleLength
+      )} | ${"Date of Completion".padEnd(maxDoCLength)} |\n`;
+      message += `${"-".repeat(maxIdLength)} | ${"-".repeat(
+        maxTitleLength
+      )} | ${"-".repeat(maxDoCLength)} |\n`;
+      for (const data of rows) {
+        message += `${data.id
+          .toString()
+          .padEnd(maxIdLength)} | ${data.name.padEnd(
+          maxTitleLength
+        )} | ${data.completedDate.padEnd(maxDoCLength)} |\n`;
+      }
+      message += "```";
+      interaction.reply(message);
     }
   },
 };
