@@ -100,39 +100,41 @@ module.exports = {
       // Show the modal to the user
       await interaction.showModal(modal);
       const filter = (interaction) => interaction.customId === `projectdesign`;
-      interaction.awaitModalSubmit({ filter }).then((modalInteraction) => {
-        const nameReply = modalInteraction.fields.getTextInputValue("name");
-        const descriptionReply =
-          modalInteraction.fields.getTextInputValue("description");
-        // const extraNotesReply =
-        //   modalInteraction.fields.getTextInputValue("extranotes");
-        const deadlineReply =
-          modalInteraction.fields.getTextInputValue("deadline");
-        const priorityReply =
-          modalInteraction.fields.getTextInputValue("priority");
-        let rProjects = client.getDesignsByName.get(nameReply);
-        if (!rProjects) {
-          rProjects = {
-            name: `${nameReply}`,
-            description: `${descriptionReply}`,
-            extranotes: ``,
-            deadline: `${deadlineReply}`,
-            priority: Number(priorityReply),
-            completed: 0,
-            completedDate: "",
-          };
-        }
-        client.setDesigns.run(rProjects);
-        const embed = new EmbedBuilder()
-          .setTitle(nameReply)
-          .setDescription(descriptionReply)
-          .addFields(
-            { name: "Deadline", value: `${deadlineReply}`, inline: true },
-            { name: "\u200B", value: "\u200B", inline: true },
-            { name: "Priority", value: `${priorityReply}`, inline: true }
-          );
-        modalInteraction.reply({ content: "Project added", embeds: [embed] });
-      });
+      interaction
+        .awaitModalSubmit({ filter, time: 600_000 })
+        .then((modalInteraction) => {
+          const nameReply = modalInteraction.fields.getTextInputValue("name");
+          const descriptionReply =
+            modalInteraction.fields.getTextInputValue("description");
+          // const extraNotesReply =
+          //   modalInteraction.fields.getTextInputValue("extranotes");
+          const deadlineReply =
+            modalInteraction.fields.getTextInputValue("deadline");
+          const priorityReply =
+            modalInteraction.fields.getTextInputValue("priority");
+          let rProjects = client.getDesignsByName.get(nameReply);
+          if (!rProjects) {
+            rProjects = {
+              name: `${nameReply}`,
+              description: `${descriptionReply}`,
+              extranotes: ``,
+              deadline: `${deadlineReply}`,
+              priority: Number(priorityReply),
+              completed: 0,
+              completedDate: "",
+            };
+          }
+          client.setDesigns.run(rProjects);
+          const embed = new EmbedBuilder()
+            .setTitle(nameReply)
+            .setDescription(descriptionReply)
+            .addFields(
+              { name: "Deadline", value: `${deadlineReply}`, inline: true },
+              { name: "\u200B", value: "\u200B", inline: true },
+              { name: "Priority", value: `${priorityReply}`, inline: true }
+            );
+          modalInteraction.reply({ content: "Project added", embeds: [embed] });
+        });
     }
     if (interaction.options.getSubcommand() === "list") {
       const rows = await APdb.prepare(
