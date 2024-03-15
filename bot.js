@@ -102,7 +102,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   try {
-    await command.execute(client, interaction);
+    await command.execute(client, interaction, APdb);
   } catch (error) {
     console.error(error);
     if (interaction.replied || interaction.deferred) {

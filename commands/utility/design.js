@@ -10,8 +10,7 @@ const {
   ComponentType,
   PermissionFlagsBits,
 } = require("discord.js");
-const Database = require("better-sqlite3");
-const APdb = new Database("H:/projects/APBot/database/AP.sqlite");
+
 const moment = require("moment/moment");
 
 module.exports = {
@@ -56,7 +55,7 @@ module.exports = {
         .setDescription("Shows a list of archived projects")
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
-  async execute(client, interaction) {
+  async execute(client, interaction, APdb) {
     if (interaction.options.getSubcommand() === "add") {
       const modal = new ModalBuilder()
         .setCustomId("projectdesign")
