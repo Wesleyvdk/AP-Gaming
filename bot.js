@@ -81,11 +81,17 @@ client.once(Events.ClientReady, async () => {
   client.setDesigns = APdb.prepare(
     "INSERT OR REPLACE INTO designs (name, description, extranotes, deadline, priority, completed, completedDate) VALUES (@name, @description, @extranotes, @deadline, @priority, @completed, @completedDate);"
   );
-  client.setDesignsById = APdb.prepare(
+  client.setDesignsCompletedById = APdb.prepare(
     "UPDATE designs SET completed = @completed, completedDate = @completedDate WHERE id = @id;"
   );
-  client.setDesignsByName = APdb.prepare(
+  client.setDesignsCompletedByName = APdb.prepare(
     "UPDATE designs SET completed = @completed, completedDate = @completedDate  WHERE name = @name;"
+  );
+  client.setDesignsUpdateById = APdb.prepare(
+    "UPDATE designs SET name = @name, description = @description, deadline = @deadline, priority = @priority"
+  );
+  client.setDesignsDeleteById = APdb.prepare(
+    "DELETE from designs WHERE id = @id;"
   );
   console.log(`designs table loaded successfully`);
   console.log(`logged in as: ${client.user.username}. ready to be used!`);
