@@ -369,6 +369,11 @@ module.exports = {
                 const priorityReply =
                   modalInteraction.fields.getTextInputValue("priority");
 
+                rProjectsId.name = nameReply;
+                rProjectsId.description = descriptionReply;
+                rProjectsId.deadline = deadlineReply;
+                rProjectsId.priority = priorityReply;
+
                 client.setDesignsUpdateById.run(rProjectsId);
                 const embed = new EmbedBuilder()
                   .setTitle(nameReply)

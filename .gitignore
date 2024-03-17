@@ -35,6 +35,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+AP.sqlite
+AP.sqlite-shm
+AP.sqlite-wal
 database.js
 template.js
 createFile.sh
