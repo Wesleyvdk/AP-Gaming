@@ -78,7 +78,7 @@ module.exports = {
     ),
   async execute(client, interaction, APdb) {
     const allowedUserIds = [
-      "1042028297795682364", // Spider
+      "552486558201151509", // Spider
       "593393250501656586", // Ehz
       "944583696952999946", // Ahas
     ];
