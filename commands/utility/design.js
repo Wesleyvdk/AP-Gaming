@@ -140,7 +140,7 @@ module.exports = {
             interaction.customId === `projectdesign`;
           interaction
             .awaitModalSubmit({ filter, time: 600_000 })
-            .then((modalInteraction) => {
+            .then(async (modalInteraction) => {
               const nameReply =
                 modalInteraction.fields.getTextInputValue("name");
               const descriptionReply =
@@ -151,31 +151,47 @@ module.exports = {
                 modalInteraction.fields.getTextInputValue("deadline");
               const priorityReply =
                 modalInteraction.fields.getTextInputValue("priority");
-              let rProjects = client.getDesignsByName.get(nameReply);
-              if (!rProjects) {
-                rProjects = {
-                  name: `${nameReply}`,
-                  description: `${descriptionReply}`,
-                  extranotes: ``,
-                  deadline: `${deadlineReply}`,
-                  priority: Number(priorityReply),
-                  completed: 0,
-                  completedDate: "",
-                };
+              if (isNaN(priorityInput)) {
+                // Priority input is not a number, provide feedback
+                await interaction.reply({
+                  content: "The priority must be a number. Please try again.",
+                  ephemeral: true, // Make the message only visible to the user
+                });
+              } else {
+                let rProjects = client.getDesignsByName.get(nameReply);
+                if (!rProjects) {
+                  rProjects = {
+                    name: `${nameReply}`,
+                    description: `${descriptionReply}`,
+                    extranotes: ``,
+                    deadline: `${deadlineReply}`,
+                    priority: Number(priorityReply),
+                    completed: 0,
+                    completedDate: "",
+                  };
+                }
+                client.setDesigns.run(rProjects);
+                const embed = new EmbedBuilder()
+                  .setTitle(nameReply)
+                  .setDescription(descriptionReply)
+                  .addFields(
+                    {
+                      name: "Deadline",
+                      value: `${deadlineReply}`,
+                      inline: true,
+                    },
+                    { name: "\u200B", value: "\u200B", inline: true },
+                    {
+                      name: "Priority",
+                      value: `${priorityReply}`,
+                      inline: true,
+                    }
+                  );
+                modalInteraction.reply({
+                  content: "Project added",
+                  embeds: [embed],
+                });
               }
-              client.setDesigns.run(rProjects);
-              const embed = new EmbedBuilder()
-                .setTitle(nameReply)
-                .setDescription(descriptionReply)
-                .addFields(
-                  { name: "Deadline", value: `${deadlineReply}`, inline: true },
-                  { name: "\u200B", value: "\u200B", inline: true },
-                  { name: "Priority", value: `${priorityReply}`, inline: true }
-                );
-              modalInteraction.reply({
-                content: "Project added",
-                embeds: [embed],
-              });
             });
         }
         if (interaction.options.getSubcommand() === "list") {
