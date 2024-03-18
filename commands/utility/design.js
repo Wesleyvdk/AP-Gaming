@@ -151,7 +151,7 @@ module.exports = {
                 modalInteraction.fields.getTextInputValue("deadline");
               const priorityReply =
                 modalInteraction.fields.getTextInputValue("priority");
-              if (isNaN(priorityInput)) {
+              if (isNaN(priorityReply)) {
                 // Priority input is not a number, provide feedback
                 await interaction.reply({
                   content: "The priority must be a number. Please try again.",
