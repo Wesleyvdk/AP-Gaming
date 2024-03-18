@@ -153,7 +153,7 @@ module.exports = {
                 modalInteraction.fields.getTextInputValue("priority");
               if (isNaN(priorityReply)) {
                 // Priority input is not a number, provide feedback
-                await interaction.reply({
+                await modalInteraction.reply({
                   content: "The priority must be a number. Please try again.",
                   ephemeral: true, // Make the message only visible to the user
                 });
