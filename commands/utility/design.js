@@ -305,7 +305,7 @@ module.exports = {
           }
         }
         if (interaction.options.getSubcommand() === "edit") {
-          projectId = interaction.options.getString("project_id");
+          const projectId = interaction.options.getString("project_id");
 
           if (projectId) {
             let rProjectsId = client.getDesignsById.get(projectId);
@@ -385,11 +385,23 @@ module.exports = {
                 const priorityReply =
                   modalInteraction.fields.getTextInputValue("priority");
 
+                console.log(
+                  `voor update`,
+                  rProjectsId,
+                  rProjectsId.name,
+                  rProjectsId.description
+                );
+
                 rProjectsId.name = nameReply;
                 rProjectsId.description = descriptionReply;
                 rProjectsId.deadline = deadlineReply;
                 rProjectsId.priority = priorityReply;
-
+                console.log(
+                  `na update`,
+                  rProjectsId,
+                  rProjectsId.name,
+                  rProjectsId.description
+                );
                 client.setDesignsUpdateById.run(rProjectsId);
                 const embed = new EmbedBuilder()
                   .setTitle(nameReply)
