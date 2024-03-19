@@ -88,7 +88,7 @@ client.once(Events.ClientReady, async () => {
     "UPDATE designs SET completed = @completed, completedDate = @completedDate  WHERE name = @name;"
   );
   client.setDesignsUpdateById = APdb.prepare(
-    "UPDATE designs SET name = @name, description = @description, deadline = @deadline, priority = @priority"
+    "UPDATE designs SET name = @name, description = @description, deadline = @deadline, priority = @priority WHERE id = @id;"
   );
   client.setDesignsDeleteById = APdb.prepare(
     "DELETE from designs WHERE id = @id;"

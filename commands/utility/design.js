@@ -402,7 +402,7 @@ module.exports = {
                   rProjectsId.name,
                   rProjectsId.description
                 );
-                client.setDesignsUpdateById.run(rProjectsId);
+                client.setDesignsUpdateById.run(rProjectsId, projectId);
                 const embed = new EmbedBuilder()
                   .setTitle(nameReply)
                   .setDescription(descriptionReply)
